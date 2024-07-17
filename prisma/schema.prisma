@@ -9,6 +9,30 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
+}
+
+// MongoDb only supports many-to-many
+model Book {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  title String
+  authors BookAuthor[]
+}
+
+model Author {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  books BookAuthor[]
+}
+
+model BookAuthor {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  bookId String @db.ObjectId
+  authorId String @db.ObjectId
+
+  book Book @relation(fields: [bookId], references: [id])
+  author Author @relation(fields: [authorId], references: [id])
+
+  @@unique([bookId, authorId])
 }
